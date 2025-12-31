@@ -1,21 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx
   labels:
-    app: nginx
+    helm.sh/chart: nginx-0.1.0
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
 spec:
-  replicas: 3 # Tells Kubernetes to run 3 pods
+  replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app.kubernetes.io/name: nginx
+      app.kubernetes.io/instance: nginx
   template:
     metadata:
       labels:
-        app: nginx
+        app.kubernetes.io/name: nginx
+        app.kubernetes.io/instance: nginx
     spec:
+      serviceAccountName: nginx
+      securityContext:
+        {}
       containers:
-      - name: nginx
-        image: nginx:1.26.1 # Specifies the Nginx image version
-        ports:
-        - containerPort: 80 # Exposes port 80 in the container
+        - name: nginx
+          securityContext:
+            {}
+          image: "nginx:1.16.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
